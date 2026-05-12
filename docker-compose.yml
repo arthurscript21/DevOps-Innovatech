@@ -1,0 +1,79 @@
+services:
+  # Base de Datos para Ventas
+  db-ventas:
+    image: mysql:8.0
+    container_name: db-ventas
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: ventas_db
+    volumes:
+      - ventas_data:/var/lib/mysql # IE3: Persistencia con Named Volume
+    networks:
+      - backend-net
+
+  # Base de Datos para Despachos
+  db-despachos:
+    image: mysql:8.0
+    container_name: db-despachos
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: despachos_db
+    volumes:
+      - despachos_data:/var/lib/mysql # IE3: Persistencia con Named Volume
+    networks:
+      - backend-net
+
+  # Backend Ventas
+  back-ventas:
+    build:
+      context: ./back-Ventas_SpringBoot/Springboot-API-REST
+    container_name: back-ventas
+    ports:
+      - "8081:8080"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://db-ventas:3306/ventas_db?createDatabaseIfNotExist=true
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=rootpassword
+    depends_on:
+      - db-ventas
+    networks:
+      - backend-net
+
+  # Backend Despachos
+  back-despachos:
+    build:
+      context: ./back-Despachos_SpringBoot/Springboot-API-REST-DESPACHO
+    container_name: back-despachos
+    ports:
+      - "8082:8080"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://db-despachos:3306/despachos_db?createDatabaseIfNotExist=true
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=rootpassword
+    depends_on:
+      - db-despachos
+    networks:
+      - backend-net
+
+  # Frontend
+  frontend:
+    build:
+      context: ./front_despacho
+    container_name: frontend-app
+    ports:
+      - "80:8080" # Mapea el puerto 8080 del contenedor Nginx al 80 del host
+    depends_on:
+      - back-ventas
+      - back-despachos
+    networks:
+      - backend-net
+
+# IE3: Definición de volúmenes para asegurar persistencia
+volumes:
+  ventas_data:
+  despachos_data:
+
+# Red interna para comunicación entre servicios
+networks:
+  backend-net:
+    driver: bridge
