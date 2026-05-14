@@ -1,0 +1,29 @@
+
+
+name: CI pipeline
+
+on:
+  pull_request:
+  push:
+    branches:
+      - develop
+jobs:
+  frontend-build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - name: Checkout repository (git clone)
+        uses: actions/checkout@v4
+
+      - name: Setup node (instalar node)
+        uses: actions/setup-node@v4
+        with: 
+          node-version: '20'
+
+      - name: Instalar dependencias
+        run: npm install
+
+      - name: Construir el frontend
+        run: npm run build
