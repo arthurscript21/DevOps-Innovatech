@@ -1,4 +1,5 @@
 services:
+  # Base de Datos para Ventas
   db-ventas:
     image: mysql:8.0
     container_name: db-ventas
@@ -10,6 +11,7 @@ services:
     networks:
       - backend-net
 
+  # Base de Datos para Despachos
   db-despachos:
     image: mysql:8.0
     container_name: db-despachos
@@ -21,8 +23,10 @@ services:
     networks:
       - backend-net
 
+  # Backend Ventas (Construcción local)
   back-ventas:
-    image: ${AWS_ACCOUNT_ID}.dkr.ecr.us-east-1.amazonaws.com/innovatech-back-ventas:latest
+    build:
+      context: ./back-Ventas_SpringBoot/Springboot-API-REST
     container_name: back-ventas
     ports:
       - "8081:8080"
@@ -35,11 +39,13 @@ services:
     networks:
       - backend-net
 
+  # Backend Despachos (Construcción local)
   back-despachos:
-    image: ${AWS_ACCOUNT_ID}.dkr.ecr.us-east-1.amazonaws.com/innovatech-back-despachos:latest
+    build:
+      context: ./back-Despachos_SpringBoot/Springboot-API-REST-DESPACHO
     container_name: back-despachos
     ports:
-      - "8082:8081" # Corregido: Internamente usa 8081 según application.properties
+      - "8082:8080"
     environment:
       - SPRING_DATASOURCE_URL=jdbc:mysql://db-despachos:3306/despachos_db?createDatabaseIfNotExist=true
       - SPRING_DATASOURCE_USERNAME=root
@@ -49,8 +55,10 @@ services:
     networks:
       - backend-net
 
+  # Frontend (Construcción local)
   frontend:
-    image: ${AWS_ACCOUNT_ID}.dkr.ecr.us-east-1.amazonaws.com/innovatech-frontend:latest
+    build:
+      context: ./front_despacho
     container_name: frontend-app
     ports:
       - "80:8080"
