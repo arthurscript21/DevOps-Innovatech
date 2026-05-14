@@ -1,5 +1,16 @@
 variable "aws_region" {
-  default = "us-east-1"
+  description = "Región de AWS"
+  default     = "us-east-1"
+}
+
+variable "instance_type" {
+  description = "Tipo de instancia EC2"
+  default     = "t2.micro"
+}
+
+variable "key_name" {
+  description = "Nombre de la llave SSH (vkey) ya creada en AWS"
+  default     = "key_proyecto"
 }
 
 variable "cluster_name" {
@@ -8,14 +19,4 @@ variable "cluster_name" {
 
 variable "service_name" {
   default = "app"
-}
-
-
-variable "instance_type" {
-  default = "t2.micro"
-}
-
-variable "key_name" {
-  description = "Nombre de tu Key Pair de AWS"
-  default     = "vkey" 
 }

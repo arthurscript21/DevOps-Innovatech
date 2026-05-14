@@ -1,8 +1,9 @@
-resource "aws_security_group" "main_sg" {
+resource "aws_security_group" "sg_innovatech" {
   name        = "sg_innovatech"
-  vpc_id      = aws_vpc.main.id
+  description = "Permitir SSH, HTTP y puertos de la aplicacion"
+  vpc_id      = aws_vpc.main_vpc.id
 
-  # SSH
+  # Puerto SSH
   ingress {
     from_port   = 22
     to_port     = 22
@@ -10,7 +11,7 @@ resource "aws_security_group" "main_sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  # Frontend (React/Vite)
+  # Puerto Frontend (Vite/React)
   ingress {
     from_port   = 5173
     to_port     = 5173
@@ -18,7 +19,7 @@ resource "aws_security_group" "main_sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  # Backends (Spring Boot)
+  # Puerto Backends (Spring Boot)
   ingress {
     from_port   = 8080
     to_port     = 8080
@@ -26,7 +27,7 @@ resource "aws_security_group" "main_sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  # Salida total
+  # Salida a internet permitida
   egress {
     from_port   = 0
     to_port     = 0
