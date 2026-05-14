@@ -9,3 +9,13 @@ variable "cluster_name" {
 variable "service_name" {
   default = "app"
 }
+
+
+variable "instance_type" {
+  default = "t2.micro"
+}
+
+variable "key_name" {
+  description = "Nombre de tu Key Pair de AWS"
+  default     = "vkey" 
+}
