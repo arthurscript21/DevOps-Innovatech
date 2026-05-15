@@ -3,7 +3,6 @@ version: '3.9'
 services:
 
   frontend:
-    # Ahora descargamos la imagen desde tu AWS ECR
     image: 667130977262.dkr.ecr.us-east-1.amazonaws.com/innovatech-frontend:latest
     container_name: frontend
     ports:
@@ -18,8 +17,7 @@ services:
       - frontend-net
 
   backend-ventas:
-    # Ahora descargamos la imagen desde tu AWS ECR
-    image: 667130977262.dkr.ecr.us-east-1.amazonaws.com/innovatech-backend-ventas:latest
+    image: 667130977262.dkr.ecr.us-east-1.amazonaws.com/innovatech-back-ventas:latest
     container_name: backend-ventas
     ports:
       - "8081:8080"
@@ -33,8 +31,7 @@ services:
       - backend-net
 
   backend-despachos:
-    # Ahora descargamos la imagen desde tu AWS ECR
-    image: 667130977262.dkr.ecr.us-east-1.amazonaws.com/innovatech-backend-despachos:latest
+    image: 667130977262.dkr.ecr.us-east-1.amazonaws.com/innovatech-back-despachos:latest
     container_name: backend-despachos
     ports:
       - "8082:8080"
