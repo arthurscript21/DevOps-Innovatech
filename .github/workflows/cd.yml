@@ -1,62 +1,57 @@
-name: Despliegue en AWS EC2
+name: CD
 
 on:
   push:
     branches:
-      -deploy 
-
-env:
-  AWS_REGION: us-east-1
+      - deploy
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout del código
-        uses: actions/checkout@v3
 
-      - name: Configurar las credenciales de AWS
-        uses: aws-actions/configure-aws-credentials@v2
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
-          aws-region: ${{ env.AWS_REGION }}
-      
-      - name: Login en ECR
+          aws-region: us-east-1
+
+      - name: Login ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
-      
-      - name: Build y Push Backend Despachos
-        run: |
-          docker build --platform linux/amd64 \
-          -t ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/innovatech-back-despachos:latest \
-          ./back-Despachos_SpringBoot/Springboot-API-REST-DESPACHO
-          docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/innovatech-back-despachos:latest
 
-      - name: Build y Push Backend Ventas
+      - name: Build image
         run: |
-          docker build --platform linux/amd64 \
-          -t ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/innovatech-back-ventas:latest \
-          ./back-Ventas_SpringBoot/Springboot-API-REST
-          docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/innovatech-back-ventas:latest
+          docker build -t innovatech-backend .
 
-      - name: Build y Push Frontend
+      - name: Tag image
         run: |
-          docker build --platform linux/amd64 \
-          -t ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/innovatech-frontend:latest \
-          ./front_despacho
-          docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/innovatech-frontend:latest
-      
-      - name: Despliegue en EC2 vía SSH
-        uses: appleboy/ssh-action@v1.0.3
+          docker tag innovatech-backend:latest \
+          ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/innovatech-backend:latest
+
+      - name: Push image
+        run: |
+          docker push \
+          ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/innovatech-backend:latest
+
+      - name: Deploy EC2
+        uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}
+          username: ec2-user
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com
-            cd /home/${{ secrets.EC2_USER }}/proyecto
+
+            cd /home/ec2-user/backend
+
             docker compose pull
-            docker compose up -d --remove-orphans
+
+            docker compose down
+
+            docker compose up -d

@@ -1,12 +1,30 @@
-# Stage 1: Build
 FROM node:20-alpine AS builder
-WORKDIR /build
+
+WORKDIR /app
+
 COPY package*.json ./
+
 RUN npm install
+
 COPY . .
+
 RUN npm run build
 
-# Stage 2: Producción con usuario no root
-FROM nginxinc/nginx-unprivileged:alpine
-COPY --from=builder --chown=nginx:nginx /build/dist /usr/share/nginx/html
+# =========================
+# STAGE 2 - PRODUCTION
+# =========================
+FROM nginx:stable-alpine
+
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+COPY --from=builder /app/dist /usr/share/nginx/html
+
+RUN chown -R appuser:appgroup /usr/share/nginx/html
+
+USER appuser
+
 EXPOSE 8080
+
+CMD ["nginx", "-g", "daemon off;"]

@@ -1,63 +1,99 @@
+version: '3.9'
+
 services:
-  # --- BASES DE DATOS ---
-  db-ventas:
-    image: mysql:8.0
-    environment:
-      - MYSQL_ROOT_PASSWORD=rootpassword
-      - MYSQL_DATABASE=ventas_db
-    volumes:
-      - ventas_data:/var/lib/mysql
-    networks:
-      - backend-net
-
-  db-despachos:
-    image: mysql:8.0
-    environment:
-      - MYSQL_ROOT_PASSWORD=rootpassword
-      - MYSQL_DATABASE=despachos_db
-    volumes:
-      - despachos_data:/var/lib/mysql
-    networks:
-      - backend-net
-
-  # --- APLICACIONES ---
-  back-ventas:
-    image: ${AWS_ACCOUNT_ID}.dkr.ecr.us-east-1.amazonaws.com/innovatech-back-ventas:latest
-    depends_on:
-      - db-ventas
-    ports:
-      - "8080:8080"
-    environment:
-      - SPRING_DATASOURCE_URL=jdbc:mysql://db-ventas:3306/ventas_db
-      - SPRING_DATASOURCE_USERNAME=root
-      - SPRING_DATASOURCE_PASSWORD=rootpassword
-    networks:
-      - backend-net
-
-  back-despachos:
-    image: ${AWS_ACCOUNT_ID}.dkr.ecr.us-east-1.amazonaws.com/innovatech-back-despachos:latest
-    depends_on:
-      - db-despachos
-    ports:
-      - "8081:8081"
-    environment:
-      - SPRING_DATASOURCE_URL=jdbc:mysql://db-despachos:3306/despachos_db
-      - SPRING_DATASOURCE_USERNAME=root
-      - SPRING_DATASOURCE_PASSWORD=rootpassword
-    networks:
-      - backend-net
 
   frontend:
-    image: ${AWS_ACCOUNT_ID}.dkr.ecr.us-east-1.amazonaws.com/innovatech-frontend:latest
+    build:
+      context: ./frontend
+
+    container_name: frontend
+
     ports:
-      - "80:80"
+      - "80:8080"
+
+    depends_on:
+      - backend-ventas
+      - backend-despachos
+
+    restart: unless-stopped
+
+    env_file:
+      - .env
+
+    networks:
+      - frontend-net
+
+  backend-ventas:
+    build:
+      context: ./backend-ventas
+
+    container_name: backend-ventas
+
+    ports:
+      - "8081:8080"
+
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+    restart: unless-stopped
+
+    env_file:
+      - .env
+
     networks:
       - backend-net
 
-volumes:
-  ventas_data:
-  despachos_data:
+  backend-despachos:
+    build:
+      context: ./backend-despachos
+
+    container_name: backend-despachos
+
+    ports:
+      - "8082:8080"
+
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+    restart: unless-stopped
+
+    env_file:
+      - .env
+
+    networks:
+      - backend-net
+
+  mysql:
+    image: mysql:8
+
+    container_name: mysql-db
+
+    restart: unless-stopped
+
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: innovatech
+
+    ports:
+      - "3306:3306"
+
+    volumes:
+      - mysql-data:/var/lib/mysql
+
+    networks:
+      - backend-net
+
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
 networks:
+  frontend-net:
   backend-net:
-    driver: bridge
+
+volumes:
+  mysql-data:
