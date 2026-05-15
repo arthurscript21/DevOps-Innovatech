@@ -30,7 +30,7 @@ jobs:
         with:
           context: ./back-Ventas_SpringBoot/Springboot-API-REST
           push: false
-          tags: innovatech-backend-ventas:latest
+          tags: innovatech-back-ventas:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -39,6 +39,6 @@ jobs:
         with:
           context: ./back-Despachos_SpringBoot/Springboot-API-REST-DESPACHO
           push: false
-          tags: innovatech-backend-despachos:latest
+          tags: innovatech-back-despachos:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max

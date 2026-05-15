@@ -6,7 +6,7 @@ services:
     image: 667130977262.dkr.ecr.us-east-1.amazonaws.com/innovatech-frontend:latest
     container_name: frontend
     ports:
-      - "80:8080"
+      - "80:80"
     depends_on:
       - backend-ventas
       - backend-despachos
