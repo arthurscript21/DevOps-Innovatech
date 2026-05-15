@@ -3,7 +3,7 @@ name: Despliegue en AWS EC2
 on:
   push:
     branches:
-      - deploy # Cambiado a la rama exigida por la rúbrica
+      - [cite_start]deploy # Requisito: Activación por rama deploy [cite: 48, 117]
 
 env:
   AWS_REGION: us-east-1
@@ -19,42 +19,44 @@ jobs:
       - name: Configurar las credenciales de AWS
         uses: aws-actions/configure-aws-credentials@v2
         with:
-          aws-access-key-id: ${{secrets.AWS_ACCESS_KEY_ID}}
-          aws-secret-access-key: ${{secrets.AWS_SECRET_ACCESS_KEY}}
-          aws-session-token: ${{secrets.AWS_SESSION_TOKEN}}
-          aws-region: ${{env.AWS_REGION}}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+          aws-region: ${{ env.AWS_REGION }}
       
       - name: Login en ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
       
-      - name: Build y Push de imagen backend
+      - name: Build y Push Backend Despachos
         run: |
           docker build --platform linux/amd64 \
-          -t ${{secrets.AWS_ACCOUNT_ID}}.dkr.ecr.${{env.AWS_REGION}}.amazonaws.com/devops-u2-backend:latest \
-          ./backend
-          docker push ${{secrets.AWS_ACCOUNT_ID}}.dkr.ecr.${{env.AWS_REGION}}.amazonaws.com/devops-u2-backend:latest
+          -t ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/innovatech-back-despachos:latest \
+          ./back-Despachos_SpringBoot/Springboot-API-REST-DESPACHO
+          docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/innovatech-back-despachos:latest
 
-      - name: Build y Push de imagen frontend
+      - name: Build y Push Backend Ventas
         run: |
           docker build --platform linux/amd64 \
-          -t ${{secrets.AWS_ACCOUNT_ID}}.dkr.ecr.${{env.AWS_REGION}}.amazonaws.com/devops-u2-frontend:latest \
-          ./frontend
-          docker push ${{secrets.AWS_ACCOUNT_ID}}.dkr.ecr.${{env.AWS_REGION}}.amazonaws.com/devops-u2-frontend:latest
+          -t ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/innovatech-back-ventas:latest \
+          ./back-Ventas_SpringBoot/Springboot-API-REST
+          docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/innovatech-back-ventas:latest
+
+      - name: Build y Push Frontend
+        run: |
+          docker build --platform linux/amd64 \
+          -t ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/innovatech-frontend:latest \
+          ./front_despacho
+          docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/innovatech-frontend:latest
       
-      - name: Despliegue automático en instancia EC2
+      - name: Despliegue en EC2 vía SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            # Autenticarse en ECR desde la instancia EC2
-            aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${{secrets.AWS_ACCOUNT_ID}}.dkr.ecr.us-east-1.amazonaws.com
-            
-            # Navegar a la carpeta del proyecto (ajusta esta ruta a donde tengas el docker-compose en EC2)
+            aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com
             cd /home/${{ secrets.EC2_USER }}/proyecto
-            
-            # Descargar las imágenes más recientes y reiniciar servicios
             docker compose pull
             docker compose up -d --remove-orphans

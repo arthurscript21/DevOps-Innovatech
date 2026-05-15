@@ -1,24 +1,17 @@
-# Multistage
 # Stage 1: Build
-FROM maven:3.9-eclipse-temurin-21 AS builder
+FROM maven:3.9-eclipse-temurin-17-alpine AS builder
 WORKDIR /build
 COPY pom.xml .
+RUN mvn dependency:go-offline
 COPY src ./src
 RUN mvn clean package -DskipTests
 
-# Stage 2: Runner
-FROM eclipse-temurin:21-jdk AS runner
+# Stage 2: Producción
+FROM eclipse-temurin:17-jre-alpine
 WORKDIR /app
-
-# Crear grupo y usuario no root
-RUN groupadd -r appgroup && useradd -r -g appgroup appuser
-
-COPY --from=builder /build/target/*.jar app.jar
-COPY entrypoint.sh /entrypoint.sh
-
-# Asignar permisos de la carpeta al nuevo usuario y cambiar a ese usuario
-RUN chown -R appuser:appgroup /app
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+# Propiedad del archivo al usuario no root [cite: 95]
+COPY --chown=appuser:appgroup --from=builder /build/target/*.jar app.jar
 USER appuser
-
 EXPOSE 8081
-ENTRYPOINT ["java","-jar","app.jar"]
+ENTRYPOINT ["java", "-jar", "app.jar"]
