@@ -56,7 +56,6 @@ resource "aws_ecs_service" "main" {
   desired_count   = 1
 
   network_configuration {
-    # Usamos las referencias automáticas en lugar de IDs fijos
     subnets          = [aws_subnet.public_subnet.id]
     assign_public_ip = true
     security_groups  = [aws_security_group.sg_innovatech.id]
