@@ -3,7 +3,7 @@ name: Despliegue en AWS EC2
 on:
   push:
     branches:
-      - [cite_start]deploy # Requisito: Activación por rama deploy [cite: 48, 117]
+      -deploy 
 
 env:
   AWS_REGION: us-east-1
