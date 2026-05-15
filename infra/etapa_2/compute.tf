@@ -1,3 +1,4 @@
+# 1. ESTE BLOQUE ES EL QUE FALTA (La declaración de la AMI)
 data "aws_ami" "amazon_linux" {
   most_recent = true
   owners      = ["amazon"]
@@ -7,6 +8,7 @@ data "aws_ami" "amazon_linux" {
   }
 }
 
+# 2. INSTANCIAS CON DISCO DE 20GB
 resource "aws_instance" "frontend" {
   ami                    = data.aws_ami.amazon_linux.id
   instance_type          = var.instance_type
@@ -14,6 +16,11 @@ resource "aws_instance" "frontend" {
   vpc_security_group_ids = [aws_security_group.sg_innovatech.id]
   key_name               = var.key_name
   tags                   = { Name = "EC2-Frontend" }
+
+  root_block_device {
+    volume_size = 20
+    volume_type = "gp3"
+  }
 }
 
 resource "aws_instance" "backend_ventas" {
@@ -23,6 +30,11 @@ resource "aws_instance" "backend_ventas" {
   vpc_security_group_ids = [aws_security_group.sg_innovatech.id]
   key_name               = var.key_name
   tags                   = { Name = "EC2-Backend-Ventas" }
+
+  root_block_device {
+    volume_size = 20
+    volume_type = "gp3"
+  }
 }
 
 resource "aws_instance" "backend_despachos" {
@@ -32,6 +44,11 @@ resource "aws_instance" "backend_despachos" {
   vpc_security_group_ids = [aws_security_group.sg_innovatech.id]
   key_name               = var.key_name
   tags                   = { Name = "EC2-Backend-Despachos" }
+
+  root_block_device {
+    volume_size = 20
+    volume_type = "gp3"
+  }
 }
 
 resource "aws_instance" "database" {
@@ -41,4 +58,9 @@ resource "aws_instance" "database" {
   vpc_security_group_ids = [aws_security_group.sg_innovatech.id]
   key_name               = var.key_name
   tags                   = { Name = "EC2-Database" }
+
+  root_block_device {
+    volume_size = 20
+    volume_type = "gp3"
+  }
 }
