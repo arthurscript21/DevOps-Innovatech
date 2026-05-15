@@ -3,88 +3,63 @@ version: '3.9'
 services:
 
   frontend:
-    build:
-      context: ./frontend
-
+    # Ahora descargamos la imagen desde tu AWS ECR
+    image: 667130977262.dkr.ecr.us-east-1.amazonaws.com/innovatech-frontend:latest
     container_name: frontend
-
     ports:
       - "80:8080"
-
     depends_on:
       - backend-ventas
       - backend-despachos
-
     restart: unless-stopped
-
     env_file:
       - .env
-
     networks:
       - frontend-net
 
   backend-ventas:
-    build:
-      context: ./backend-ventas
-
+    # Ahora descargamos la imagen desde tu AWS ECR
+    image: 667130977262.dkr.ecr.us-east-1.amazonaws.com/innovatech-backend-ventas:latest
     container_name: backend-ventas
-
     ports:
       - "8081:8080"
-
     depends_on:
       mysql:
         condition: service_healthy
-
     restart: unless-stopped
-
     env_file:
       - .env
-
     networks:
       - backend-net
 
   backend-despachos:
-    build:
-      context: ./backend-despachos
-
+    # Ahora descargamos la imagen desde tu AWS ECR
+    image: 667130977262.dkr.ecr.us-east-1.amazonaws.com/innovatech-backend-despachos:latest
     container_name: backend-despachos
-
     ports:
       - "8082:8080"
-
     depends_on:
       mysql:
         condition: service_healthy
-
     restart: unless-stopped
-
     env_file:
       - .env
-
     networks:
       - backend-net
 
   mysql:
     image: mysql:8
-
     container_name: mysql-db
-
     restart: unless-stopped
-
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_DATABASE: innovatech
-
     ports:
       - "3306:3306"
-
     volumes:
       - mysql-data:/var/lib/mysql
-
     networks:
       - backend-net
-
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       interval: 10s

@@ -10,7 +10,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-
       - name: Checkout
         uses: actions/checkout@v4
 
@@ -25,19 +24,23 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Build image
+      - name: Build and Push Frontend
         run: |
-          docker build -t innovatech-backend .
+          docker build -t innovatech-frontend ./front_despacho
+          docker tag innovatech-frontend:latest ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/innovatech-frontend:latest
+          docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/innovatech-frontend:latest
 
-      - name: Tag image
+      - name: Build and Push Backend Ventas
         run: |
-          docker tag innovatech-backend:latest \
-          ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/innovatech-backend:latest
+          docker build -t innovatech-backend-ventas ./back-Ventas_SpringBoot/Springboot-API-REST
+          docker tag innovatech-backend-ventas:latest ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/innovatech-backend-ventas:latest
+          docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/innovatech-backend-ventas:latest
 
-      - name: Push image
+      - name: Build and Push Backend Despachos
         run: |
-          docker push \
-          ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/innovatech-backend:latest
+          docker build -t innovatech-backend-despachos ./back-Despachos_SpringBoot/Springboot-API-REST-DESPACHO
+          docker tag innovatech-backend-despachos:latest ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/innovatech-backend-despachos:latest
+          docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/innovatech-backend-despachos:latest
 
       - name: Deploy EC2
         uses: appleboy/ssh-action@master
@@ -47,11 +50,9 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com
-
+            
             cd /home/ec2-user/backend
-
+            
             docker compose pull
-
             docker compose down
-
             docker compose up -d
