@@ -6,8 +6,8 @@ resource "aws_ecs_task_definition" "app" {
   family                   = "app-task"
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
-  cpu                      = "1024"
-  memory                   = "2048"
+  cpu                      = "2048"
+  memory                   = "4096"
  
   execution_role_arn       = "arn:aws:iam::667130977262:role/LabRole"
   task_role_arn            = "arn:aws:iam::667130977262:role/LabRole"
@@ -18,12 +18,21 @@ resource "aws_ecs_task_definition" "app" {
       image     = "${aws_ecr_repository.back_ventas.repository_url}:latest"
       essential = true
       portMappings = [{ containerPort = 8080, hostPort = 8080 }]
+      logConfiguration = {
+        logDriver = "awslogs"
+        options = {
+          awslogs-group         = "/ecs/innovatech"
+          awslogs-region        = "us-east-1"
+          awslogs-stream-prefix = "ecs"
+        }
+      }
       environment = [
         { name = "DB_ENDPOINT", value = aws_instance.database.private_ip },
         { name = "DB_PORT",     value = "3306" },
         { name = "DB_NAME",     value = "ventas_db" },
         { name = "DB_USERNAME", value = "root" },
-        { name = "DB_PASSWORD", value = "rootpassword" }
+        { name = "DB_PASSWORD", value = "rootpassword" },
+        { name = "JAVA_TOOL_OPTIONS", value = "-Xms256m -Xmx512m" }
       ]
     },
     {
@@ -36,7 +45,8 @@ resource "aws_ecs_task_definition" "app" {
         { name = "DB_PORT",     value = "3306" },
         { name = "DB_NAME",     value = "despachos_db" },
         { name = "DB_USERNAME", value = "root" },
-        { name = "DB_PASSWORD", value = "rootpassword" }
+        { name = "DB_PASSWORD", value = "rootpassword" },
+        { name = "JAVA_TOOL_OPTIONS", value = "-Xms256m -Xmx512m" } 
       ]
     },
     {
