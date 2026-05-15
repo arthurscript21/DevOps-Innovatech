@@ -26,19 +26,19 @@ jobs:
 
       - name: Build and Push Frontend
         run: |
-          docker build -t innovatech-frontend ./front_despacho
+          docker build -t frontend ./front_despacho
           docker tag innovatech-frontend:latest ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/innovatech-frontend:latest
           docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/innovatech-frontend:latest
 
       - name: Build and Push Backend Ventas
         run: |
-          docker build -t innovatech-backend-ventas ./back-Ventas_SpringBoot/Springboot-API-REST
+          docker build -t innovatech-back-ventas ./back-Ventas_SpringBoot/Springboot-API-REST
           docker tag innovatech-backend-ventas:latest ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/innovatech-backend-ventas:latest
           docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/innovatech-backend-ventas:latest
 
       - name: Build and Push Backend Despachos
         run: |
-          docker build -t innovatech-backend-despachos ./back-Despachos_SpringBoot/Springboot-API-REST-DESPACHO
+          docker build -t innovatech-back-despachos ./back-Despachos_SpringBoot/Springboot-API-REST-DESPACHO
           docker tag innovatech-backend-despachos:latest ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/innovatech-backend-despachos:latest
           docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/innovatech-backend-despachos:latest
 
