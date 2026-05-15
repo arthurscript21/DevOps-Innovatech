@@ -6,9 +6,11 @@ resource "aws_ecs_task_definition" "app" {
   family                   = "app-task"
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
-  cpu                      = "2048"
+  
+  # Aumentamos a 2 vCPU y 4GB RAM para evitar el error 137
+  cpu                      = "2048" 
   memory                   = "4096"
- 
+
   execution_role_arn       = "arn:aws:iam::667130977262:role/LabRole"
   task_role_arn            = "arn:aws:iam::667130977262:role/LabRole"
 
@@ -18,21 +20,11 @@ resource "aws_ecs_task_definition" "app" {
       image     = "${aws_ecr_repository.back_ventas.repository_url}:latest"
       essential = true
       portMappings = [{ containerPort = 8080, hostPort = 8080 }]
-      logConfiguration = {
-        logDriver = "awslogs"
-        options = {
-          awslogs-group         = "/ecs/innovatech"
-          awslogs-region        = "us-east-1"
-          awslogs-stream-prefix = "ecs"
-        }
-      }
       environment = [
-        { name = "DB_ENDPOINT", value = aws_instance.database.private_ip },
-        { name = "DB_PORT",     value = "3306" },
-        { name = "DB_NAME",     value = "ventas_db" },
-        { name = "DB_USERNAME", value = "root" },
-        { name = "DB_PASSWORD", value = "rootpassword" },
-        { name = "JAVA_TOOL_OPTIONS", value = "-Xms256m -Xmx512m" }
+        # Formato correcto que espera Spring Boot
+        { name = "SPRING_DATASOURCE_URL", value = "jdbc:mysql://${aws_instance.database.private_ip}:3306/ventas_db" },
+        { name = "SPRING_DATASOURCE_USERNAME", value = "root" },
+        { name = "SPRING_DATASOURCE_PASSWORD", value = "rootpassword" }
       ]
     },
     {
@@ -41,12 +33,9 @@ resource "aws_ecs_task_definition" "app" {
       essential = true
       portMappings = [{ containerPort = 8081, hostPort = 8081 }]
       environment = [
-        { name = "DB_ENDPOINT", value = aws_instance.database.private_ip },
-        { name = "DB_PORT",     value = "3306" },
-        { name = "DB_NAME",     value = "despachos_db" },
-        { name = "DB_USERNAME", value = "root" },
-        { name = "DB_PASSWORD", value = "rootpassword" },
-        { name = "JAVA_TOOL_OPTIONS", value = "-Xms256m -Xmx512m" } 
+        { name = "SPRING_DATASOURCE_URL", value = "jdbc:mysql://${aws_instance.database.private_ip}:3306/despachos_db" },
+        { name = "SPRING_DATASOURCE_USERNAME", value = "root" },
+        { name = "SPRING_DATASOURCE_PASSWORD", value = "rootpassword" }
       ]
     },
     {
