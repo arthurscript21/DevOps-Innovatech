@@ -3,7 +3,6 @@ resource "aws_ecs_cluster" "main" {
   name = var.cluster_name
 }
 
-# (Opcional, pero recomendado) Crear grupo de logs para ver errores
 resource "aws_cloudwatch_log_group" "ecs_logs" {
   name              = "/ecs/${var.cluster_name}"
   retention_in_days = 7
@@ -14,7 +13,6 @@ resource "aws_ecs_task_definition" "app" {
   family                   = "app-task"
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
-  
   cpu                      = "2048" 
   memory                   = "4096"
 
@@ -28,16 +26,15 @@ resource "aws_ecs_task_definition" "app" {
       essential = true
       portMappings = [{ containerPort = 8080, hostPort = 8080 }]
       environment = [
-        { name = "SPRING_DATASOURCE_URL", value = "jdbc:mysql://${aws_instance.database.private_ip}:3306/ventas_db" },
+        { name = "SPRING_DATASOURCE_URL", value = "jdbc:mysql://${aws_instance.database.private_ip}:3306/ventas_db?createDatabaseIfNotExist=true" },
         { name = "SPRING_DATASOURCE_USERNAME", value = "root" },
-        { name = "SPRING_DATASOURCE_PASSWORD", value = "rootpassword" }
+        { name = "SPRING_DATASOURCE_PASSWORD", value = "ClaveSegura123" } # Sincronizado
       ]
-      # AÑADIDO: Configuración de logs del profe
       logConfiguration = {
         logDriver = "awslogs",
         options = {
           awslogs-group         = aws_cloudwatch_log_group.ecs_logs.name,
-          awslogs-region        = "us-east-1", # Cambia esto si no usas us-east-1
+          awslogs-region        = "us-east-1",
           awslogs-stream-prefix = "ventas"
         }
       }
@@ -48,11 +45,10 @@ resource "aws_ecs_task_definition" "app" {
       essential = true
       portMappings = [{ containerPort = 8081, hostPort = 8081 }]
       environment = [
-        { name = "SPRING_DATASOURCE_URL", value = "jdbc:mysql://${aws_instance.database.private_ip}:3306/despachos_db" },
+        { name = "SPRING_DATASOURCE_URL", value = "jdbc:mysql://${aws_instance.database.private_ip}:3306/despachos_db?createDatabaseIfNotExist=true" },
         { name = "SPRING_DATASOURCE_USERNAME", value = "root" },
-        { name = "SPRING_DATASOURCE_PASSWORD", value = "rootpassword" }
+        { name = "SPRING_DATASOURCE_PASSWORD", value = "ClaveSegura123" } # Sincronizado
       ]
-      # AÑADIDO: Configuración de logs
       logConfiguration = {
         logDriver = "awslogs",
         options = {
@@ -68,13 +64,11 @@ resource "aws_ecs_task_definition" "app" {
       essential = true
       portMappings = [{ containerPort = 80, hostPort = 80 }]
       
-      # AÑADIDO: Dependencia para que espere a los backends
       dependsOn = [
         { containerName = "backend-ventas", condition = "START" },
         { containerName = "backend-despachos", condition = "START" }
       ]
 
-      # AÑADIDO: Configuración de logs
       logConfiguration = {
         logDriver = "awslogs",
         options = {
