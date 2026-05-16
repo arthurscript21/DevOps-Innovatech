@@ -89,7 +89,7 @@ jobs:
       - name: Deploy to EC2 via SSH
         uses: appleboy/ssh-action@master
         with:
-          host: "13.217.196.127" # <--- ESCRIBE TU IP DIRECTAMENTE AQUÍ ENTRE LAS COMILLAS
+          host: "54.242.91.201" # <--- ESCRIBE TU IP DIRECTAMENTE AQUÍ ENTRE LAS COMILLAS
           username: ec2-user
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
