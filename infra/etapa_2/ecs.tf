@@ -26,9 +26,11 @@ resource "aws_ecs_task_definition" "app" {
       essential = true
       portMappings = [{ containerPort = 8080, hostPort = 8080 }]
       environment = [
-        { name = "SPRING_DATASOURCE_URL", value = "jdbc:mysql://${aws_instance.database.private_ip}:3306/ventas_db?createDatabaseIfNotExist=true" },
-        { name = "SPRING_DATASOURCE_USERNAME", value = "root" },
-        { name = "SPRING_DATASOURCE_PASSWORD", value = "ClaveSegura123" } # Sincronizado
+        { name = "DB_ENDPOINT", value = "${aws_instance.database.private_ip}" },
+        { name = "DB_PORT",     value = "3306" },
+        { name = "DB_NAME",     value = "ventas_db" },
+        { name = "DB_USERNAME", value = "root" },
+        { name = "DB_PASSWORD", value = "ClaveSegura123" }
       ]
       logConfiguration = {
         logDriver = "awslogs",
@@ -45,9 +47,11 @@ resource "aws_ecs_task_definition" "app" {
       essential = true
       portMappings = [{ containerPort = 8081, hostPort = 8081 }]
       environment = [
-        { name = "SPRING_DATASOURCE_URL", value = "jdbc:mysql://${aws_instance.database.private_ip}:3306/despachos_db?createDatabaseIfNotExist=true" },
-        { name = "SPRING_DATASOURCE_USERNAME", value = "root" },
-        { name = "SPRING_DATASOURCE_PASSWORD", value = "ClaveSegura123" } # Sincronizado
+        { name = "DB_ENDPOINT", value = "${aws_instance.database.private_ip}" },
+        { name = "DB_PORT",     value = "3306" },
+        { name = "DB_NAME",     value = "despachos_db" },
+        { name = "DB_USERNAME", value = "root" },
+        { name = "DB_PASSWORD", value = "ClaveSegura123" }
       ]
       logConfiguration = {
         logDriver = "awslogs",
