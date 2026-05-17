@@ -10,10 +10,10 @@ env:
   # =========================================================================
   # REEMPLAZA ESTAS IPs CON LOS OUTPUTS DE TERRAFORM
   # =========================================================================
-  HOST_FRONTEND: 'TU_IP_PUBLICA_FRONTEND'
-  HOST_VENTAS: 'TU_IP_PUBLICA_VENTAS'
-  HOST_DESPACHOS: 'TU_IP_PUBLICA_DESPACHOS'
-  DB_PRIVATE_IP: 'TU_IP_PRIVADA_DATABASE'
+  HOST_FRONTEND: '3.88.58.131'
+  HOST_VENTAS: '3.94.152.233'
+  HOST_DESPACHOS: '18.206.176.115'
+  DB_PRIVATE_IP: '10.0.1.61'
 
 jobs:
   build-and-deploy:
