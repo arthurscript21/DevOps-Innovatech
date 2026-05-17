@@ -8,7 +8,7 @@ on:
 env:
   AWS_REGION: us-east-1
   # =========================================================================
-  # REEMPLAZA ESTAS IPs CON LOS OUTPUTS DE TERRAFORM
+  # REEMPLAZA ESTAS IPs CON LOS OUTPUTS DE TERRAFORM CUANDO LAS TENGAS
   # =========================================================================
   HOST_FRONTEND: '3.88.58.131'
   HOST_VENTAS: '3.94.152.233'
@@ -64,8 +64,9 @@ jobs:
             docker stop back-ventas || true
             docker rm back-ventas || true
             docker pull 667130977262.dkr.ecr.us-east-1.amazonaws.com/innovatech-back-ventas:latest
+            # CORRECCIÓN: DB_ENDPOINT cambiado a DB_HOST
             docker run -d --name back-ventas -p 8080:8080 \
-              -e DB_ENDPOINT=${{ env.DB_PRIVATE_IP }} \
+              -e DB_HOST=${{ env.DB_PRIVATE_IP }} \
               -e DB_PORT=3306 \
               -e DB_NAME=ventas_db \
               -e DB_USERNAME=root \
@@ -87,8 +88,9 @@ jobs:
             docker stop back-despachos || true
             docker rm back-despachos || true
             docker pull 667130977262.dkr.ecr.us-east-1.amazonaws.com/innovatech-back-despachos:latest
+            # CORRECCIÓN: DB_ENDPOINT cambiado a DB_HOST
             docker run -d --name back-despachos -p 8081:8081 \
-              -e DB_ENDPOINT=${{ env.DB_PRIVATE_IP }} \
+              -e DB_HOST=${{ env.DB_PRIVATE_IP }} \
               -e DB_PORT=3306 \
               -e DB_NAME=despachos_db \
               -e DB_USERNAME=root \
