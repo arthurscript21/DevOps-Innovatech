@@ -10,7 +10,7 @@ variable "instance_type" {
 
 variable "key_name" {
   description = "Nombre de la llave SSH (vkey) ya creada en AWS"
-  default     = "proyecto_key"
+  default     = "labsuser"
 }
 
 variable "cluster_name" {
