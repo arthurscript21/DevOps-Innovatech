@@ -3,7 +3,7 @@ version: '3.9'
 services:
 
   frontend:
-    image: 667130977262.dkr.ecr.us-east-1.amazonaws.com/innovatech-frontend:latest
+    build: ./front_despacho
     container_name: frontend
     ports:
       - "80:80"
@@ -11,13 +11,11 @@ services:
       - backend-ventas
       - backend-despachos
     restart: unless-stopped
-    env_file:
-      - .env
     networks:
       - frontend-net
 
   backend-ventas:
-    image: 667130977262.dkr.ecr.us-east-1.amazonaws.com/innovatech-back-ventas:latest
+    build: ./back-Ventas_SpringBoot/Springboot-API-REST
     container_name: backend-ventas
     ports:
       - "8081:8080"
@@ -25,22 +23,30 @@ services:
       mysql:
         condition: service_healthy
     restart: unless-stopped
-    env_file:
-      - .env
+    environment:
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_NAME: ventas_db
+      DB_USERNAME: root
+      DB_PASSWORD: ${MYSQL_ROOT_PASSWORD}
     networks:
       - backend-net
 
   backend-despachos:
-    image: 667130977262.dkr.ecr.us-east-1.amazonaws.com/innovatech-back-despachos:latest
+    build: ./back-Despachos_SpringBoot/Springboot-API-REST-DESPACHO
     container_name: backend-despachos
     ports:
-      - "8082:8081" # CORRECCIÓN: El contenedor expone el 8081 internamente
+      - "8082:8081"
     depends_on:
       mysql:
         condition: service_healthy
     restart: unless-stopped
-    env_file:
-      - .env
+    environment:
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_NAME: despachos_db
+      DB_USERNAME: root
+      DB_PASSWORD: ${MYSQL_ROOT_PASSWORD}
     networks:
       - backend-net
 
