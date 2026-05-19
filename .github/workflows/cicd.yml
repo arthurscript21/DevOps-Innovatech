@@ -10,7 +10,7 @@ env:
   # =========================================================================
   # REEMPLAZA ESTA IP CON EL OUTPUT DE TU INSTANCIA ÚNICA DE TERRAFORM
   # =========================================================================
-  EC2_HOST: ${{ secrets.EC2_HOST_PUBLICA }}
+  EC2_HOST: ${{ variable.EC2_HOST_PUBLICA }}
 
 jobs:
   build-and-deploy:
