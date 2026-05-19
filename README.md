@@ -1,19 +1,19 @@
-DevOps InnovaTech - CI/CD & Infraestructura AWS
-Descripción
+# DevOps InnovaTech - CI/CD & Infraestructura AWS
+
+**Descripción**
 Proyecto integral de DevOps que automatiza el aprovisionamiento de infraestructura en AWS y el despliegue de una arquitectura de microservicios. Utiliza Terraform para la infraestructura como código (IaC) y un pipeline de CI/CD en GitHub Actions para construir, almacenar y desplegar contenedores Docker en una instancia EC2.
 
-Infraestructura como Código (IaC): Aprovisionamiento de VPC, EC2, ECR y Security Groups usando Terraform.
+* **Infraestructura como Código (IaC):** Aprovisionamiento de VPC, EC2, ECR y Security Groups usando Terraform.
+* **Microservicios:** Frontend en React/Vite (servido con Nginx) y dos APIs Backend en Java Spring Boot (Ventas y Despachos).
+* **Contenedorización:** Imágenes Docker optimizadas con Multi-Stage builds para frontend y backends.
+* **Automatización CI/CD:** Pipeline de GitHub Actions que compila, sube imágenes a Amazon ECR y despliega automáticamente usando Docker Compose vía SSH.
+* **Gestión de Base de Datos:** Contenedor MySQL versión 8 con volúmenes persistentes y *healthchecks*.
 
-Microservicios: Frontend en React/Vite (servido con Nginx) y dos APIs Backend en Java Spring Boot (Ventas y Despachos).
+---
 
-Contenedorización: Imágenes Docker optimizadas con Multi-Stage builds para frontend y backends.
+### 📦 Estructura del proyecto
 
-Automatización CI/CD: Pipeline de GitHub Actions que compila, sube imágenes a Amazon ECR y despliega automáticamente usando Docker Compose vía SSH.
-
-Gestión de Base de Datos: Contenedor MySQL versión 8 con volúmenes persistentes y healthchecks.
-
-📦 Estructura del proyecto
-Plaintext
+```text
 DEVOPS-INNOVATECH/
 ├── .github/
 │   └── workflows/
@@ -102,25 +102,20 @@ Backend Despachos: Expuesto en el puerto 8082.
 
 Base de datos: MySQL 8 expuesto en el puerto 3306, aislado en su propia red interna y con almacenamiento persistente.
 
-📐 Diagrama de arquitectura
-(Aquí puedes insertar la imagen de tu diagrama de red y componentes, mostrando la VPC, las Subnets públicas, la EC2 con los contenedores Docker dentro, y los repositorios ECR conectados).
-
 📌 Mejores prácticas incluidas
-Multi-stage Builds en Docker: Se utilizan etapas de "builder" para compilar el código (Maven/Node) y luego imágenes base ligeras (Alpine/Nginx/JRE) solo para la ejecución, reduciendo drásticamente el tamaño final de las imágenes y mejorando la seguridad.
+Modularización de IaC: Separación lógica de recursos por archivo (network, compute, security, ecs) para facilitar el mantenimiento.
 
-Principio de mínimo privilegio: En los Dockerfile de Spring Boot, se crea y utiliza un usuario no-root (spring) para ejecutar la aplicación, evitando vulnerabilidades si el contenedor es comprometido.
+Automatización de inicialización: Uso de user_data para evitar configuraciones manuales por SSH en el servidor de base de datos.
 
-Aislamiento de Redes: En el docker-compose.yml, los servicios están segmentados en redes lógicas (frontend-net y backend-net), evitando que el frontend tenga comunicación directa e innecesaria con la base de datos.
+Gestión de secretos y estados: Archivo .gitignore configurado rigurosamente para prevenir la subida de archivos .env y el estado sensible de Terraform (.tfstate).
 
-Healthchecks: El contenedor MySQL incluye un healthcheck nativo, y los backends tienen una condición depends_on: service_healthy para asegurar que la aplicación no inicie hasta que la base de datos esté 100% operativa.
+Dependencias de servicios: Configuración de depends_on y healthcheck en Docker Compose y Terraform para asegurar el orden correcto de inicialización de los servicios.
 
-Infraestructura Modular: Separación clara del código de infraestructura en archivos .tf específicos según su propósito (red, cómputo, seguridad, IAM).
+🔧 Cómo extender este proyecto
+Implementar un Application Load Balancer (ALB) frente al clúster ECS para balancear tráfico y habilitar HTTPS.
 
-🛠️ Cómo extender este proyecto
-Implementar Balanceo de Carga: Agregar un Application Load Balancer (ALB) delante de las instancias EC2 para manejar el tráfico de forma más eficiente y permitir escalabilidad horizontal (Auto Scaling Groups).
+Migrar la Base de Datos desde una instancia EC2 autogestionada hacia un servicio administrado como Amazon RDS.
 
-Migrar a Base de Datos Administrada: Reemplazar el contenedor MySQL por una instancia de Amazon RDS para obtener respaldos automáticos, alta disponibilidad y mejor rendimiento.
+Automatizar la construcción y el push de imágenes de Docker hacia ECR utilizando pipelines CI/CD mediante GitHub Actions.
 
-Orquestación Avanzada: Migrar el docker-compose en una única EC2 hacia un clúster de Amazon ECS (Elastic Container Service) o EKS (Kubernetes) para despliegues empresariales.
-
-Certificados SSL: Integrar AWS Certificate Manager (ACM) en el Load Balancer o configurar Certbot (Let's Encrypt) en Nginx para habilitar tráfico HTTPS en el Frontend y las APIs.
+Configurar un backend remoto para Terraform (como un bucket S3 y DynamoDB) para el bloqueo y gestión compartida del estado.
