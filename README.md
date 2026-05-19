@@ -1,99 +1,126 @@
-# Terraform AWS Infrastructure - DEVOPS-INNOVATECH
+DevOps InnovaTech - CI/CD & Infraestructura AWS
+Descripción
+Proyecto integral de DevOps que automatiza el aprovisionamiento de infraestructura en AWS y el despliegue de una arquitectura de microservicios. Utiliza Terraform para la infraestructura como código (IaC) y un pipeline de CI/CD en GitHub Actions para construir, almacenar y desplegar contenedores Docker en una instancia EC2.
 
-**Descripción**
-Infraestructura gestionada con Terraform para desplegar una arquitectura basada en microservicios y contenedores en AWS:
+Infraestructura como Código (IaC): Aprovisionamiento de VPC, EC2, ECR y Security Groups usando Terraform.
 
-* **Red Virtual (VPC)** configurada con subred pública e Internet Gateway.
-* **Instancia EC2** actuando como servidor de Base de Datos (MySQL) automatizado con Docker.
-* **Amazon ECR** para almacenar imágenes de contenedores del frontend (React/Vite) y backend (Spring Boot).
-* **Amazon ECS (Fargate)** para la orquestación y despliegue de los servicios web.
-* **Security Groups** configurados para habilitar puertos específicos (80, 8081, 8082, 3306, 22).
-* **Docker Compose** para orquestación y pruebas en entornos locales.
+Microservicios: Frontend en React/Vite (servido con Nginx) y dos APIs Backend en Java Spring Boot (Ventas y Despachos).
 
----
+Contenedorización: Imágenes Docker optimizadas con Multi-Stage builds para frontend y backends.
 
-### 📦 Estructura del proyecto
+Automatización CI/CD: Pipeline de GitHub Actions que compila, sube imágenes a Amazon ECR y despliega automáticamente usando Docker Compose vía SSH.
 
-```text
+Gestión de Base de Datos: Contenedor MySQL versión 8 con volúmenes persistentes y healthchecks.
+
+📦 Estructura del proyecto
+Plaintext
 DEVOPS-INNOVATECH/
-├── back-Ventas_SpringBoot/      # Código fuente Backend (API REST)
-├── front_despacho/              # Código fuente Frontend (React/Vite)
-├── docker-compose.yml           # Orquestación local conectada a ECR
-└── infra/etapa_2/               # Infraestructura como Código (Terraform)
-    ├── compute.tf               # Instancia EC2 y User Data (MySQL)
-    ├── ecr.tf                   # Repositorios elásticos de contenedores
-    ├── ecs.tf                   # Clúster, Task Definitions y Servicios
-    ├── iam.tf                   # Roles y políticas de acceso
-    ├── main.tf                  # Configuración del provider principal
-    ├── network.tf               # VPC, Subnets y Route Tables
-    ├── outputs.tf               # Salidas de IPs (públicas y privadas)
-    ├── provider.tf              # Dependencias de AWS
-    ├── security.tf              # Grupos de seguridad y reglas de red
-    ├── variables.tf             # Variables parametrizadas (región, tipo EC2)
-    └── .gitignore               # Exclusión de archivos de estado (.tfstate)
+├── .github/
+│   └── workflows/
+│       └── cicd.yml                # Pipeline automatizado de CI/CD
+├── back-Despachos_SpringBoot/      # Microservicio de Despachos
+│   ├── src/
+│   ├── pom.xml
+│   └── Dockerfile                  # Multi-stage build (Java 17)
+├── back-Ventas_SpringBoot/         # Microservicio de Ventas
+│   ├── src/
+│   ├── pom.xml
+│   └── Dockerfile                  # Multi-stage build (Java 17)
+├── front_despacho/                 # Aplicación Frontend (Node/Vite)
+│   ├── src/
+│   ├── package.json
+│   ├── nginx.conf
+│   └── Dockerfile                  # Multi-stage build (Node 18 -> Nginx)
+├── infra/etapa_2/                  # Código de Infraestructura (Terraform)
+│   ├── compute.tf                  # Definición de instancia EC2
+│   ├── network.tf                  # VPC, Subnets y ruteo
+│   ├── ecr.tf                      # Repositorios de contenedores
+│   ├── security.tf                 # Grupos de seguridad
+│   ├── main.tf
+│   └── variables.tf
+└── docker-compose.yml              # Orquestación de contenedores en el servidor
+🚀 Requisitos
+Terraform CLI instalado localmente.
 
-🔗 Requisitos
+Cuenta de AWS con credenciales de acceso (Access Key ID y Secret Access Key).
 
-Terraform CLI versión >= 1.0
+GitHub Repository con los siguientes Secrets configurados para el entorno:
 
-AWS CLI configurado con credenciales de acceso.
+AWS_ACCESS_KEY_ID y AWS_SECRET_ACCESS_KEY
 
-Docker y Docker Compose instalados (para ejecución de entorno local).
+AWS_SESSION_TOKEN (Si aplica)
 
-Cuenta de AWS con permisos de despliegue sobre EC2, ECS, ECR y VPC.
+EC2_SSH_KEY (Llave privada PEM para acceder a la instancia)
 
-⚙️ Flujo de uso
+Docker y Docker Compose (para pruebas en entornos locales).
 
-1. Clona el repositorio:
+⚙️ Flujo de uso y despliegue
+1. Aprovisionar la Infraestructura (Terraform)
+Primero, debes crear los recursos en AWS. Navega a la carpeta de infraestructura e inicializa Terraform:
 
 Bash
-git clone <URL_DEL_REPOSITORIO>
-cd DEVOPS-INNOVATECH/infra/etapa_2
-2. Inicializa Terraform:
-
-Bash
+cd infra/etapa_2
 terraform init
-3. Verifica el plan de ejecución:
+Verifica el plan de ejecución y aplícalo:
 
 Bash
 terraform plan
-4. Aplica los cambios en AWS:
+terraform apply -auto-approve
+(Nota: Guarda la IP pública de la instancia EC2 generada y actualízala en tu archivo cicd.yml en la variable EC2_HOST).
+
+2. Despliegue automatizado (CI/CD)
+El proyecto cuenta con integración y entrega continua. Para desplegar la aplicación, simplemente realiza un push a la rama deploy:
 
 Bash
-terraform apply
-5. (Opcional) Levanta el entorno local:
+git add .
+git commit -m "feat: actualización de servicios"
+git push origin deploy
+El pipeline de GitHub Actions se encargará de compilar, empaquetar, subir las imágenes a Amazon ECR y reiniciar los contenedores en la máquina EC2 de forma automática.
 
-Bash
-cd ../../
-docker-compose up -d
+🏗️ ¿Qué despliega este proyecto? (Paso a paso)
+El proyecto funciona en dos grandes etapas operativas:
 
-💡 ¿Qué despliega este proyecto?
-Módulo de red (network.tf): Crea una VPC (10.0.0.0/16) dedicada para el proyecto, junto con una subred pública, un Internet Gateway y una tabla de enrutamiento que permite la salida a internet.
+1. Infraestructura Base (Terraform):
+Se encarga de crear el ecosistema de red (VPC, Subnets), las reglas de seguridad (Security Groups para habilitar los puertos 80, 8081, 8082, 3306 y 22), los repositorios privados en Amazon ECR para almacenar las imágenes Docker, y finalmente una máquina virtual Amazon EC2 (Ubuntu/Amazon Linux) que actuará como servidor host.
 
-Módulo de cómputo (compute.tf): Despliega una instancia EC2 (Amazon Linux 2023, t2.micro) que ejecuta un script de inicialización (user_data). Este script actualiza el sistema, instala Docker, y levanta automáticamente un contenedor de MySQL en el puerto 3306.
+2. Despliegue de Aplicación (GitHub Actions + Docker Compose):
+Cuando se detectan cambios, el workflow cicd.yml ejecuta lo siguiente:
 
-Módulo de contenedores (ecr.tf y ecs.tf): Aprovisiona tres repositorios ECR (frontend, backend ventas, backend despachos). Además, crea un clúster ECS Serverless usando AWS Fargate para ejecutar las aplicaciones, mapeando dinámicamente las variables de entorno de la base de datos hacia la IP privada de la instancia EC2.
+Build & Push: Lee los Dockerfile de cada carpeta. Usa Maven para compilar los .jar de Spring Boot y Node para compilar los estáticos del Frontend. Luego, crea imágenes mínimas basadas en Alpine/Nginx y las sube a los repositorios de Amazon ECR.
 
-Orquestación Local (docker-compose.yml): Un stack preparado para consumir las imágenes alojadas en AWS ECR y replicar el entorno de producción en máquinas de desarrollo de forma aislada.
+Transferencia: Copia el archivo docker-compose.yml desde el repositorio hacia la instancia EC2 usando SCP.
+
+Despliegue unificado: Se conecta por SSH a la EC2, inyecta las variables de entorno de base de datos dinámicamente (.env), se autentica con Amazon ECR, descarga (pull) las imágenes más recientes y levanta los servicios (docker compose up -d).
+
+Servicios levantados en el EC2:
+
+Frontend: Expuesto en el puerto 80.
+
+Backend Ventas: Expuesto en el puerto 8081.
+
+Backend Despachos: Expuesto en el puerto 8082.
+
+Base de datos: MySQL 8 expuesto en el puerto 3306, aislado en su propia red interna y con almacenamiento persistente.
 
 📐 Diagrama de arquitectura
-(Nota: Aquí puedes insertar la imagen de tu diagrama de AWS arrastrándola desde tu explorador de archivos directamente a tu editor de GitHub/GitLab)
-![Diagrama AWS](./ruta-a-tu-imagen.png)
+(Aquí puedes insertar la imagen de tu diagrama de red y componentes, mostrando la VPC, las Subnets públicas, la EC2 con los contenedores Docker dentro, y los repositorios ECR conectados).
 
 📌 Mejores prácticas incluidas
-Modularización de IaC: Separación lógica de recursos por archivo (network, compute, security, ecs) para facilitar el mantenimiento.
+Multi-stage Builds en Docker: Se utilizan etapas de "builder" para compilar el código (Maven/Node) y luego imágenes base ligeras (Alpine/Nginx/JRE) solo para la ejecución, reduciendo drásticamente el tamaño final de las imágenes y mejorando la seguridad.
 
-Automatización de inicialización: Uso de user_data para evitar configuraciones manuales por SSH en el servidor de base de datos.
+Principio de mínimo privilegio: En los Dockerfile de Spring Boot, se crea y utiliza un usuario no-root (spring) para ejecutar la aplicación, evitando vulnerabilidades si el contenedor es comprometido.
 
-Gestión de secretos y estados: Archivo .gitignore configurado rigurosamente para prevenir la subida de archivos .env y el estado sensible de Terraform (.tfstate).
+Aislamiento de Redes: En el docker-compose.yml, los servicios están segmentados en redes lógicas (frontend-net y backend-net), evitando que el frontend tenga comunicación directa e innecesaria con la base de datos.
 
-Dependencias de servicios: Configuración de depends_on y healthcheck en Docker Compose y Terraform para asegurar el orden correcto de inicialización de los servicios.
+Healthchecks: El contenedor MySQL incluye un healthcheck nativo, y los backends tienen una condición depends_on: service_healthy para asegurar que la aplicación no inicie hasta que la base de datos esté 100% operativa.
 
-🔧 Cómo extender este proyecto
-Implementar un Application Load Balancer (ALB) frente al clúster ECS para balancear tráfico y habilitar HTTPS.
+Infraestructura Modular: Separación clara del código de infraestructura en archivos .tf específicos según su propósito (red, cómputo, seguridad, IAM).
 
-Migrar la Base de Datos desde una instancia EC2 autogestionada hacia un servicio administrado como Amazon RDS.
+🛠️ Cómo extender este proyecto
+Implementar Balanceo de Carga: Agregar un Application Load Balancer (ALB) delante de las instancias EC2 para manejar el tráfico de forma más eficiente y permitir escalabilidad horizontal (Auto Scaling Groups).
 
-Automatizar la construcción y el push de imágenes de Docker hacia ECR utilizando pipelines CI/CD mediante GitHub Actions.
+Migrar a Base de Datos Administrada: Reemplazar el contenedor MySQL por una instancia de Amazon RDS para obtener respaldos automáticos, alta disponibilidad y mejor rendimiento.
 
-Configurar un backend remoto para Terraform (como un bucket S3 y DynamoDB) para el bloqueo y gestión compartida del estado.
+Orquestación Avanzada: Migrar el docker-compose en una única EC2 hacia un clúster de Amazon ECS (Elastic Container Service) o EKS (Kubernetes) para despliegues empresariales.
+
+Certificados SSL: Integrar AWS Certificate Manager (ACM) en el Load Balancer o configurar Certbot (Let's Encrypt) en Nginx para habilitar tráfico HTTPS en el Frontend y las APIs.
