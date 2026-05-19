@@ -76,7 +76,7 @@ jobs:
             echo "MYSQL_ROOT_PASSWORD=ClaveSegura123" > /home/ec2-user/app/.env
             
             # Autenticar Docker con el registro ECR de AWS desde la instancia
-            aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 667130977262.dkr.ecr.us-east-1.amazonaws.com
+            aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 905418192378.dkr.ecr.us-east-1.amazonaws.com
             
             # Moverse al directorio del despliegue, descargar cambios y reiniciar el stack
             cd /home/ec2-user/app/
