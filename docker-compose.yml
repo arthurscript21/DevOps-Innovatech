@@ -1,7 +1,7 @@
 services:
 
   frontend:
-    image: 667130977262.dkr.ecr.us-east-1.amazonaws.com/innovatech-frontend:latest
+    image: 905418192378.dkr.ecr.us-east-1.amazonaws.com/innovatech-frontend:latest
     container_name: frontend
     ports:
       - "80:80"
@@ -13,7 +13,7 @@ services:
       - frontend-net
 
   backend-ventas:
-    image: 667130977262.dkr.ecr.us-east-1.amazonaws.com/innovatech-back-ventas:latest
+    image: 905418192378.dkr.ecr.us-east-1.amazonaws.com/innovatech-back-ventas:latest
     container_name: backend-ventas
     ports:
       - "8081:8080"
@@ -31,7 +31,7 @@ services:
       - backend-net
 
   backend-despachos:
-    image: 667130977262.dkr.ecr.us-east-1.amazonaws.com/innovatech-back-despachos:latest
+    image: 905418192378.dkr.ecr.us-east-1.amazonaws.com/innovatech-back-despachos:latest
     container_name: backend-despachos
     ports:
       - "8082:8081"
